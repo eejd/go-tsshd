@@ -27,6 +27,8 @@ package tsshd
 import (
 	"fmt"
 	"io"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -323,6 +325,13 @@ func RunMain(opts ...Option) (int, error) {
 	})
 
 	_ = os.Stdout.Close()
+
+	// Start pprof server in the background for local debugging
+	go func() {
+		if err := http.ListenAndServe("127.0.0.1:6060", nil); err != nil {
+			fmt.Fprintf(os.Stderr, "pprof server failed: %v\n", err)
+		}
+	}()
 
 	// start background liveness watchdog
 	go monitorServerLiveness(args)
