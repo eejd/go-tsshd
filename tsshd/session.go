@@ -419,6 +419,13 @@ func (c *sessionContext) Close() {
 			debug("session [%d] cmd killed", c.id)
 		}
 	}
+
+	if c.ioStream != nil {
+		_ = c.ioStream.Close()
+	}
+	if c.errStream != nil {
+		_ = c.errStream.Close()
+	}
 }
 
 func (c *sessionContext) SetSize(cols, rows int, redraw bool, discardOutput bool, discardMarker []byte) error {
