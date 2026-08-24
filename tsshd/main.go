@@ -27,9 +27,6 @@ package tsshd
 import (
 	"fmt"
 	"io"
-	"net"
-	"net/http"
-	_ "net/http/pprof"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -327,24 +324,7 @@ func RunMain(opts ...Option) (int, error) {
 
 	_ = os.Stdout.Close()
 
-	// Start pprof server in the background for local debugging
-	go func() {
-		listener, err := net.Listen("tcp", "127.0.0.1:0")
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "pprof listener failed: %v\n", err)
-			return
-		}
-		port := listener.Addr().(*net.TCPAddr).Port
-		portFile := fmt.Sprintf("/tmp/tsshd-pprof-%d.port", os.Getpid())
-		if err := os.WriteFile(portFile, []byte(fmt.Sprintf("%d\n", port)), 0644); err != nil {
-			fmt.Fprintf(os.Stderr, "write pprof port file failed: %v\n", err)
-		}
-		defer os.Remove(portFile)
 
-		if err := http.Serve(listener, nil); err != nil {
-			fmt.Fprintf(os.Stderr, "pprof server failed: %v\n", err)
-		}
-	}()
 
 	// start background liveness watchdog
 	go monitorServerLiveness(args)
