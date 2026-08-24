@@ -388,6 +388,8 @@ func (c *sessionContext) Close() {
 	delete(sessionMap, c.id)
 	sessionMutex.Unlock()
 
+	c.clientChecker.Close()
+
 	code := -1
 	if c.mwSess != nil {
 		if exitCode := c.mwSess.exitCode.Load(); exitCode != nil {
